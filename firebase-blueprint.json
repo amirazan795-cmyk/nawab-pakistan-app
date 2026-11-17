@@ -1,0 +1,363 @@
+{
+  "entities": {
+    "UserRecord": {
+      "title": "UserRecord",
+      "description": "Registered buyer or seller user account stored in Firestore.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "phone": { "type": "string", "minLength": 7, "maxLength": 32 },
+        "role": { "type": "string", "enum": ["buyer", "seller"] },
+        "city": { "type": "string", "maxLength": 80 },
+        "area": { "type": "string", "maxLength": 120 },
+        "address": { "type": "string", "maxLength": 240 },
+        "isBlocked": { "type": "boolean" },
+        "createdAtIso": { "type": "string", "maxLength": 64 },
+        "lastLoginAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "name", "phone", "role", "isBlocked", "createdAtIso", "lastLoginAt"]
+    },
+    "SellerRecord": {
+      "title": "SellerRecord",
+      "description": "Seller shop profile with verification and Blue Tick status.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "maxLength": 120 },
+        "shopName": { "type": "string", "maxLength": 120 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "photo": { "type": "string", "maxLength": 350000 },
+        "location": { "type": "string", "maxLength": 180 },
+        "city": { "type": "string", "maxLength": 80 },
+        "cnicNumber": { "type": "string", "maxLength": 32 },
+        "isVerified": { "type": "boolean" },
+        "hasBlueTick": { "type": "boolean" },
+        "blueTickStatus": { "type": "string", "enum": ["none", "pending", "verified"] },
+        "blueTickTid": { "type": "string", "maxLength": 64 },
+        "cnicFrontUploaded": { "type": "boolean" },
+        "cnicBackUploaded": { "type": "boolean" },
+        "idVerificationStatus": { "type": "string", "enum": ["none", "pending", "verified"] },
+        "rating": { "type": "number" },
+        "reviewsCount": { "type": "number" },
+        "primaryCategory": { "type": "string", "maxLength": 100 },
+        "isBlocked": { "type": "boolean" },
+        "sellerType": { "type": "string", "enum": ["shop", "home"] },
+        "oneTimeVerificationDone": { "type": "boolean" },
+        "createdAtIso": { "type": "string", "maxLength": 64 },
+        "lastLoginAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "name", "shopName", "phone", "location", "isVerified"]
+    },
+    "ProductRecord": {
+      "title": "ProductRecord",
+      "description": "Marketplace listing or doorstep service posted by a seller.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "price": { "type": "number" },
+        "category": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "location": { "type": "string", "maxLength": 180 },
+        "distanceKm": { "type": "number" },
+        "sellerId": { "type": "string", "maxLength": 128 },
+        "sellerName": { "type": "string", "maxLength": 120 },
+        "sellerPhone": { "type": "string", "maxLength": 32 },
+        "sellerPhoto": { "type": "string", "maxLength": 350000 },
+        "sellerVerified": { "type": "boolean" },
+        "sellerHasBlueTick": { "type": "boolean" },
+        "sellerType": { "type": "string", "enum": ["shop", "home"] },
+        "image": { "type": "string", "maxLength": 450000 },
+        "images": { "type": "array" },
+        "condition": { "type": "string", "enum": ["Brand New", "Like New", "Gently Used"] },
+        "description": { "type": "string", "maxLength": 2000 },
+        "stock": { "type": "number" },
+        "rating": { "type": "number" },
+        "reviewsCount": { "type": "number" },
+        "permanent": { "type": "boolean" },
+        "renewedAtIso": { "type": "string", "maxLength": 64 },
+        "expiresAtMs": { "type": "number" },
+        "isHomeService": { "type": "boolean" },
+        "serviceTime": { "type": "string", "maxLength": 80 },
+        "packages": { "type": "array" },
+        "createdAtIso": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "title", "price", "category", "location", "sellerId", "sellerName", "sellerPhone", "sellerVerified", "image", "condition", "description", "stock"]
+    },
+    "ChatThreadRecord": {
+      "title": "ChatThreadRecord",
+      "description": "NAWAB Secure Chat conversation header between buyer and seller.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "buyerName": { "type": "string", "maxLength": 120 },
+        "buyerPhone": { "type": "string", "maxLength": 32 },
+        "sellerId": { "type": "string", "maxLength": 128 },
+        "sellerName": { "type": "string", "maxLength": 120 },
+        "sellerPhone": { "type": "string", "maxLength": 32 },
+        "productId": { "type": "string", "maxLength": 128 },
+        "productTitle": { "type": "string", "maxLength": 160 },
+        "category": { "type": "string", "maxLength": 100 },
+        "updatedAt": { "type": "string", "maxLength": 64 },
+        "updatedAtMs": { "type": "number" },
+        "unreadForBuyer": { "type": "number" },
+        "unreadForSeller": { "type": "number" }
+      },
+      "required": ["id", "buyerName", "buyerPhone", "sellerId", "sellerName", "sellerPhone", "updatedAt"]
+    },
+    "ChatMessageRecord": {
+      "title": "ChatMessageRecord",
+      "description": "Individual message inside a NAWAB Secure Chat thread subcollection.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "senderRole": { "type": "string", "enum": ["buyer", "seller"] },
+        "senderName": { "type": "string", "maxLength": 120 },
+        "text": { "type": "string", "maxLength": 4000 },
+        "time": { "type": "string", "maxLength": 64 },
+        "createdAtMs": { "type": "number" },
+        "type": { "type": "string", "enum": ["text", "address", "booking", "photo", "location", "voice", "order"] },
+        "imageUrl": { "type": "string", "maxLength": 450000 },
+        "audioUrl": { "type": "string", "maxLength": 600000 },
+        "audioDurationSec": { "type": "number" },
+        "delivered": { "type": "boolean" },
+        "seen": { "type": "boolean" }
+      },
+      "required": ["id", "senderRole", "senderName", "text", "time", "createdAtMs"]
+    },
+    "BlueTickRequestRecord": {
+      "title": "BlueTickRequestRecord",
+      "description": "Blue Tick verification payment proof submitted by a seller.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "sellerId": { "type": "string", "maxLength": 128 },
+        "sellerName": { "type": "string", "maxLength": 120 },
+        "shopName": { "type": "string", "maxLength": 120 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "tid": { "type": "string", "maxLength": 64 },
+        "screenshot": { "type": "string", "maxLength": 500000 },
+        "fee": { "type": "number" },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "createdAtIso": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "approvedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "sellerId", "sellerName", "shopName", "phone", "tid", "fee", "createdAt", "status"]
+    },
+    "SellerIdProofRecord": {
+      "title": "SellerIdProofRecord",
+      "description": "Private CNIC front/back photos submitted by a seller for admin verification.",
+      "type": "object",
+      "properties": {
+        "sellerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "sellerName": { "type": "string", "maxLength": 120 },
+        "sellerPhone": { "type": "string", "maxLength": 32 },
+        "frontPhoto": { "type": "string", "maxLength": 450000 },
+        "backPhoto": { "type": "string", "maxLength": 450000 },
+        "sellerType": { "type": "string", "enum": ["shop", "home"] },
+        "shopName": { "type": "string", "maxLength": 120 },
+        "sellerPhoto": { "type": "string", "maxLength": 450000 },
+        "location": { "type": "string", "maxLength": 180 },
+        "status": { "type": "string", "enum": ["none", "pending", "verified"] },
+        "submittedAt": { "type": "string", "maxLength": 64 },
+        "submittedAtIso": { "type": "string", "maxLength": 64 },
+        "reviewedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["sellerId", "sellerName", "sellerPhone", "status"]
+    },
+    "HomeBookingRecord": {
+      "title": "HomeBookingRecord",
+      "description": "Doorstep home service booking made by a buyer.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "productId": { "type": "string", "maxLength": 128 },
+        "productTitle": { "type": "string", "maxLength": 160 },
+        "category": { "type": "string", "maxLength": 100 },
+        "price": { "type": "number" },
+        "packageName": { "type": "string", "maxLength": 120 },
+        "sellerId": { "type": "string", "maxLength": 128 },
+        "sellerName": { "type": "string", "maxLength": 120 },
+        "sellerPhone": { "type": "string", "maxLength": 32 },
+        "buyerName": { "type": "string", "maxLength": 120 },
+        "buyerPhone": { "type": "string", "maxLength": 32 },
+        "buyerAddress": { "type": "string", "maxLength": 300 },
+        "preferredTime": { "type": "string", "maxLength": 100 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "on_the_way", "completed"] },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "productId", "productTitle", "category", "price", "sellerId", "sellerName", "sellerPhone", "buyerName", "buyerPhone", "buyerAddress", "preferredTime", "status", "createdAt"]
+    },
+    "OrderRecord": {
+      "title": "OrderRecord",
+      "description": "Cash on Delivery / Cash on Work order record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "buyerName": { "type": "string", "maxLength": 120 },
+        "buyerPhone": { "type": "string", "maxLength": 32 },
+        "deliveryAddress": { "type": "string", "maxLength": 300 },
+        "deliveryArea": { "type": "string", "maxLength": 120 },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "paymentMode": { "type": "string", "maxLength": 80 },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "out_for_delivery", "delivered"] },
+        "estimatedDelivery": { "type": "string", "maxLength": 120 }
+      },
+      "required": ["id", "createdAt", "buyerName", "buyerPhone", "deliveryAddress", "deliveryArea", "items", "subtotal", "totalAmount", "paymentMode", "status"]
+    },
+    "ProductReviewRecord": {
+      "title": "ProductReviewRecord",
+      "description": "Buyer rating and review for a product or service.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "productId": { "type": "string", "maxLength": 128 },
+        "sellerId": { "type": "string", "maxLength": 128 },
+        "buyerName": { "type": "string", "maxLength": 120 },
+        "rating": { "type": "number" },
+        "comment": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "productId", "buyerName", "rating", "createdAt"]
+    },
+    "ProductReportRecord": {
+      "title": "ProductReportRecord",
+      "description": "Fraud or policy report submitted by a buyer or seller.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "productId": { "type": "string", "maxLength": 128 },
+        "productTitle": { "type": "string", "maxLength": 160 },
+        "sellerId": { "type": "string", "maxLength": 128 },
+        "sellerName": { "type": "string", "maxLength": 120 },
+        "reporterName": { "type": "string", "maxLength": 120 },
+        "reporterPhone": { "type": "string", "maxLength": 32 },
+        "reason": { "type": "string", "maxLength": 200 },
+        "details": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["pending", "resolved"] }
+      },
+      "required": ["id", "productId", "productTitle", "sellerId", "sellerName", "reporterName", "reporterPhone", "reason", "createdAt", "status"]
+    },
+    "PresenceRecord": {
+      "title": "PresenceRecord",
+      "description": "Real-time online presence timestamp for chat and in-app voice calling.",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string", "maxLength": 128 },
+        "lastSeenMs": { "type": "number" }
+      },
+      "required": ["key", "lastSeenMs"]
+    },
+    "VoiceCallRecord": {
+      "title": "VoiceCallRecord",
+      "description": "Real-time signaling document for NAWAB in-app voice calls.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "callerRole": { "type": "string", "enum": ["buyer", "seller"] },
+        "callerName": { "type": "string", "maxLength": 120 },
+        "callerPhone": { "type": "string", "maxLength": 32 },
+        "calleeRole": { "type": "string", "enum": ["buyer", "seller"] },
+        "calleeId": { "type": "string", "maxLength": 128 },
+        "calleeName": { "type": "string", "maxLength": 120 },
+        "calleePhone": { "type": "string", "maxLength": 32 },
+        "status": { "type": "string", "enum": ["ringing", "connected", "ended", "missed", "rejected"] },
+        "startedAtMs": { "type": "number" }
+      },
+      "required": ["id", "callerRole", "callerName", "callerPhone", "calleeRole", "calleeId", "calleeName", "calleePhone", "status", "startedAtMs"]
+    },
+    "AdminPublicConfig": {
+      "title": "AdminPublicConfig",
+      "description": "Public routing and Blue Tick offer settings for the hidden admin URL and pricing.",
+      "type": "object",
+      "properties": {
+        "secretPath": { "type": "string", "maxLength": 80 },
+        "blueTickOfferStartIso": { "type": "string", "maxLength": 64 },
+        "adminJazzCashNumber": { "type": "string", "maxLength": 32 },
+        "adminJazzCashTitle": { "type": "string", "maxLength": 80 },
+        "updatedAtIso": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["secretPath", "blueTickOfferStartIso", "adminJazzCashNumber", "adminJazzCashTitle"]
+    },
+    "AdminCredentialsConfig": {
+      "title": "AdminCredentialsConfig",
+      "description": "Hidden Admin Number and hashed 6-digit secret PIN.",
+      "type": "object",
+      "properties": {
+        "adminPhone": { "type": "string", "maxLength": 32 },
+        "pinHash": { "type": "string", "minLength": 64, "maxLength": 64 },
+        "authProofHash": { "type": "string", "minLength": 64, "maxLength": 64 },
+        "updatedAtIso": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["adminPhone", "pinHash", "updatedAtIso"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserRecord" },
+      "description": "Registered buyer and seller user records."
+    },
+    "/sellers/{sellerId}": {
+      "schema": { "$ref": "#/entities/SellerRecord" },
+      "description": "Seller shop profiles and verification state."
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/ProductRecord" },
+      "description": "All public marketplace listings and doorstep services."
+    },
+    "/chats/{threadId}": {
+      "schema": { "$ref": "#/entities/ChatThreadRecord" },
+      "description": "NAWAB Secure Chat conversation headers."
+    },
+    "/chats/{threadId}/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/ChatMessageRecord" },
+      "description": "Messages inside each NAWAB Secure Chat thread."
+    },
+    "/blue_tick_requests/{requestId}": {
+      "schema": { "$ref": "#/entities/BlueTickRequestRecord" },
+      "description": "Blue Tick verification payment requests with JazzCash screenshots."
+    },
+    "/id_proofs/{sellerId}": {
+      "schema": { "$ref": "#/entities/SellerIdProofRecord" },
+      "description": "Seller ID card verification photos and approval state."
+    },
+    "/home_bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/HomeBookingRecord" },
+      "description": "Doorstep home service bookings."
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/OrderRecord" },
+      "description": "Cash on Delivery / Cash on Work orders."
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/ProductReviewRecord" },
+      "description": "Buyer ratings and reviews."
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/ProductReportRecord" },
+      "description": "Fraud reports submitted by buyers."
+    },
+    "/presence/{presenceId}": {
+      "schema": { "$ref": "#/entities/PresenceRecord" },
+      "description": "User online heartbeat timestamps."
+    },
+    "/voice_calls/{callId}": {
+      "schema": { "$ref": "#/entities/VoiceCallRecord" },
+      "description": "In-app voice call signaling state."
+    },
+    "/admin_config/public": {
+      "schema": { "$ref": "#/entities/AdminPublicConfig" },
+      "description": "Hidden admin secret route path and Blue Tick offer configuration."
+    },
+    "/admin_config/credentials": {
+      "schema": { "$ref": "#/entities/AdminCredentialsConfig" },
+      "description": "Hidden admin login number and hashed 6-digit PIN."
+    }
+  }
+}

@@ -1,0 +1,474 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'name', 'phone', 'role', 'isBlocked', 'createdAtIso', 'lastLoginAt'])
+        && data.keys().hasOnly(['id', 'name', 'phone', 'role', 'city', 'area', 'address', 'isBlocked', 'createdAtIso', 'lastLoginAt'])
+        && isValidId(data.id)
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 120
+        && data.phone is string && data.phone.size() >= 7 && data.phone.size() <= 32
+        && (data.role == 'buyer' || data.role == 'seller')
+        && (!('city' in data) || (data.city is string && data.city.size() <= 80))
+        && (!('area' in data) || (data.area is string && data.area.size() <= 120))
+        && (!('address' in data) || (data.address is string && data.address.size() <= 240))
+        && data.isBlocked is bool
+        && data.createdAtIso is string && data.createdAtIso.size() <= 64
+        && data.lastLoginAt is string && data.lastLoginAt.size() <= 64;
+    }
+
+    function isValidSeller(data) {
+      return data.keys().hasAll(['id', 'name', 'shopName', 'phone', 'location', 'isVerified'])
+        && data.keys().hasOnly([
+          'id', 'name', 'shopName', 'phone', 'photo', 'location', 'city', 'isVerified',
+          'hasBlueTick', 'blueTickStatus', 'blueTickTid', 'cnicNumber',
+          'cnicFrontUploaded', 'cnicBackUploaded', 'idVerificationStatus',
+          'faceVerified', 'rating', 'reviewsCount', 'createdAtIso',
+          'lastLoginAt', 'primaryCategory', 'isBlocked',
+          'sellerType', 'oneTimeVerificationDone'
+        ])
+        && isValidId(data.id)
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 120
+        && data.shopName is string && data.shopName.size() >= 1 && data.shopName.size() <= 120
+        && data.phone is string && data.phone.size() <= 32
+        && data.location is string && data.location.size() <= 180
+        && (!('city' in data) || (data.city is string && data.city.size() <= 80))
+        && data.isVerified is bool
+        && (!('photo' in data) || (data.photo is string && data.photo.size() <= 450000))
+        && (!('hasBlueTick' in data) || data.hasBlueTick is bool)
+        && (!('blueTickStatus' in data) || (data.blueTickStatus in ['none', 'pending', 'verified']))
+        && (!('blueTickTid' in data) || (data.blueTickTid is string && data.blueTickTid.size() <= 64))
+        && (!('cnicNumber' in data) || (data.cnicNumber is string && data.cnicNumber.size() <= 32))
+        && (!('cnicFrontUploaded' in data) || data.cnicFrontUploaded is bool)
+        && (!('cnicBackUploaded' in data) || data.cnicBackUploaded is bool)
+        && (!('idVerificationStatus' in data) || (data.idVerificationStatus in ['none', 'pending', 'verified']))
+        && (!('faceVerified' in data) || data.faceVerified is bool)
+        && (!('rating' in data) || (data.rating is number && data.rating >= 0 && data.rating <= 5))
+        && (!('reviewsCount' in data) || (data.reviewsCount is number && data.reviewsCount >= 0))
+        && (!('createdAtIso' in data) || (data.createdAtIso is string && data.createdAtIso.size() <= 64))
+        && (!('lastLoginAt' in data) || (data.lastLoginAt is string && data.lastLoginAt.size() <= 64))
+        && (!('primaryCategory' in data) || (data.primaryCategory is string && data.primaryCategory.size() <= 100))
+        && (!('isBlocked' in data) || data.isBlocked is bool)
+        && (!('sellerType' in data) || (data.sellerType in ['shop', 'home']))
+        && (!('oneTimeVerificationDone' in data) || data.oneTimeVerificationDone is bool);
+    }
+
+    function isValidProduct(data) {
+      return data.keys().hasAll([
+          'id', 'title', 'price', 'category', 'location', 'distanceKm',
+          'sellerId', 'sellerName', 'sellerPhone', 'sellerVerified',
+          'image', 'condition', 'description', 'stock'
+        ])
+        && data.keys().hasOnly([
+          'id', 'title', 'price', 'category', 'location', 'distanceKm',
+          'sellerId', 'sellerName', 'sellerPhone', 'sellerPhoto',
+          'sellerVerified', 'sellerHasBlueTick', 'sellerType', 'image', 'images',
+          'condition', 'description', 'stock', 'featured', 'rating',
+          'reviewsCount', 'permanent', 'renewedAtIso', 'expiresAtMs',
+          'isHomeService', 'serviceTime', 'packages', 'createdAtIso'
+        ])
+        && isValidId(data.id)
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 160
+        && data.price is number && data.price >= 0 && data.price <= 100000000
+        && data.category is string && data.category.size() >= 1 && data.category.size() <= 100
+        && data.location is string && data.location.size() <= 180
+        && data.distanceKm is number && data.distanceKm >= 0
+        && data.sellerId is string && data.sellerId.size() >= 1 && data.sellerId.size() <= 128
+        && data.sellerName is string && data.sellerName.size() >= 1 && data.sellerName.size() <= 120
+        && data.sellerPhone is string && data.sellerPhone.size() <= 32
+        && data.sellerVerified is bool
+        && data.image is string && data.image.size() <= 500000
+        && (data.condition in ['Brand New', 'Like New', 'Gently Used'])
+        && data.description is string && data.description.size() <= 2000
+        && data.stock is number && data.stock >= 0
+        && (!('sellerPhoto' in data) || (data.sellerPhoto is string && data.sellerPhoto.size() <= 450000))
+        && (!('sellerHasBlueTick' in data) || data.sellerHasBlueTick is bool)
+        && (!('sellerType' in data) || (data.sellerType in ['shop', 'home']))
+        && (!('images' in data) || (data.images is list && data.images.size() <= 5 && (data.images.size() == 0 || data.images[0] is string)))
+        && (!('featured' in data) || data.featured is bool)
+        && (!('rating' in data) || (data.rating is number && data.rating >= 0 && data.rating <= 5))
+        && (!('reviewsCount' in data) || (data.reviewsCount is number && data.reviewsCount >= 0))
+        && (!('permanent' in data) || data.permanent is bool)
+        && (!('renewedAtIso' in data) || (data.renewedAtIso is string && data.renewedAtIso.size() <= 64))
+        && (!('expiresAtMs' in data) || (data.expiresAtMs is number && data.expiresAtMs > 0))
+        && (!('isHomeService' in data) || data.isHomeService is bool)
+        && (!('serviceTime' in data) || (data.serviceTime is string && data.serviceTime.size() <= 80))
+        && (!('packages' in data) || (data.packages is list && data.packages.size() <= 10))
+        && (!('createdAtIso' in data) || (data.createdAtIso is string && data.createdAtIso.size() <= 64));
+    }
+
+    function isValidChatThread(data) {
+      return data.keys().hasAll(['id', 'buyerName', 'buyerPhone', 'sellerId', 'sellerName', 'sellerPhone', 'updatedAt'])
+        && data.keys().hasOnly([
+          'id', 'buyerName', 'buyerPhone', 'sellerId', 'sellerName', 'sellerPhone',
+          'productId', 'productTitle', 'category', 'updatedAt', 'updatedAtMs',
+          'unreadForBuyer', 'unreadForSeller'
+        ])
+        && isValidId(data.id)
+        && data.buyerName is string && data.buyerName.size() <= 120
+        && data.buyerPhone is string && data.buyerPhone.size() <= 32
+        && data.sellerId is string && data.sellerId.size() <= 128
+        && data.sellerName is string && data.sellerName.size() <= 120
+        && data.sellerPhone is string && data.sellerPhone.size() <= 32
+        && data.updatedAt is string && data.updatedAt.size() <= 64
+        && (!('productId' in data) || (data.productId is string && data.productId.size() <= 128))
+        && (!('productTitle' in data) || (data.productTitle is string && data.productTitle.size() <= 160))
+        && (!('category' in data) || (data.category is string && data.category.size() <= 100))
+        && (!('updatedAtMs' in data) || data.updatedAtMs is number)
+        && (!('unreadForBuyer' in data) || (data.unreadForBuyer is number && data.unreadForBuyer >= 0))
+        && (!('unreadForSeller' in data) || (data.unreadForSeller is number && data.unreadForSeller >= 0));
+    }
+
+    function isValidChatMessage(data) {
+      return data.keys().hasAll(['id', 'senderRole', 'senderName', 'text', 'time', 'createdAtMs'])
+        && data.keys().hasOnly([
+          'id', 'senderRole', 'senderName', 'text', 'time', 'createdAtMs',
+          'type', 'imageUrl', 'audioUrl', 'audioDurationSec',
+          'delivered', 'seen', 'locationInfo', 'orderInfo', 'bookingInfo'
+        ])
+        && isValidId(data.id)
+        && (data.senderRole == 'buyer' || data.senderRole == 'seller')
+        && data.senderName is string && data.senderName.size() <= 120
+        && data.text is string && data.text.size() <= 4000
+        && data.time is string && data.time.size() <= 64
+        && data.createdAtMs is number
+        && (!('type' in data) || (data.type in ['text', 'address', 'booking', 'photo', 'location', 'voice', 'order']))
+        && (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 500000))
+        && (!('audioUrl' in data) || (data.audioUrl is string && data.audioUrl.size() <= 650000))
+        && (!('audioDurationSec' in data) || data.audioDurationSec is number)
+        && (!('delivered' in data) || data.delivered is bool)
+        && (!('seen' in data) || data.seen is bool)
+        && (!('locationInfo' in data) || data.locationInfo is map)
+        && (!('orderInfo' in data) || data.orderInfo is map)
+        && (!('bookingInfo' in data) || data.bookingInfo is map);
+    }
+
+    function isValidBlueTickRequest(data) {
+      return data.keys().hasAll(['id', 'sellerId', 'sellerName', 'shopName', 'phone', 'tid', 'fee', 'createdAt', 'status'])
+        && data.keys().hasOnly([
+          'id', 'sellerId', 'sellerName', 'shopName', 'phone', 'tid',
+          'screenshot', 'fee', 'createdAt', 'createdAtIso', 'status', 'approvedAt'
+        ])
+        && isValidId(data.id)
+        && data.sellerId is string && data.sellerId.size() <= 128
+        && data.sellerName is string && data.sellerName.size() <= 120
+        && data.shopName is string && data.shopName.size() <= 120
+        && data.phone is string && data.phone.size() <= 32
+        && data.tid is string && data.tid.size() >= 1 && data.tid.size() <= 64
+        && (!('screenshot' in data) || (data.screenshot is string && data.screenshot.size() <= 550000))
+        && data.fee is number && data.fee >= 0
+        && data.createdAt is string && data.createdAt.size() <= 64
+        && (!('createdAtIso' in data) || (data.createdAtIso is string && data.createdAtIso.size() <= 64))
+        && (data.status in ['pending', 'approved', 'rejected'])
+        && (!('approvedAt' in data) || (data.approvedAt is string && data.approvedAt.size() <= 64));
+    }
+
+    function isValidIdProof(data) {
+      return data.keys().hasAll(['sellerId', 'sellerName', 'sellerPhone', 'status'])
+        && data.keys().hasOnly([
+          'sellerId', 'sellerName', 'sellerPhone', 'frontPhoto', 'backPhoto',
+          'sellerType', 'shopName', 'sellerPhoto', 'location',
+          'status', 'submittedAt', 'submittedAtIso', 'reviewedAt'
+        ])
+        && isValidId(data.sellerId)
+        && data.sellerName is string && data.sellerName.size() <= 120
+        && data.sellerPhone is string && data.sellerPhone.size() <= 32
+        && (!('frontPhoto' in data) || (data.frontPhoto is string && data.frontPhoto.size() <= 500000))
+        && (!('backPhoto' in data) || (data.backPhoto is string && data.backPhoto.size() <= 500000))
+        && (!('sellerType' in data) || (data.sellerType in ['shop', 'home']))
+        && (!('shopName' in data) || (data.shopName is string && data.shopName.size() <= 120))
+        && (!('sellerPhoto' in data) || (data.sellerPhoto is string && data.sellerPhoto.size() <= 450000))
+        && (!('location' in data) || (data.location is string && data.location.size() <= 180))
+        && (data.status in ['none', 'pending', 'verified'])
+        && (!('submittedAt' in data) || (data.submittedAt is string && data.submittedAt.size() <= 64))
+        && (!('submittedAtIso' in data) || (data.submittedAtIso is string && data.submittedAtIso.size() <= 64))
+        && (!('reviewedAt' in data) || (data.reviewedAt is string && data.reviewedAt.size() <= 64));
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll([
+          'id', 'productId', 'productTitle', 'category', 'price',
+          'sellerId', 'sellerName', 'sellerPhone', 'buyerName',
+          'buyerPhone', 'buyerAddress', 'preferredTime', 'status', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'productId', 'productTitle', 'category', 'price', 'packageName',
+          'sellerId', 'sellerName', 'sellerPhone', 'buyerName', 'buyerPhone',
+          'buyerAddress', 'preferredTime', 'notes', 'status', 'createdAt'
+        ])
+        && isValidId(data.id)
+        && data.productId is string && data.productId.size() <= 128
+        && data.productTitle is string && data.productTitle.size() <= 160
+        && data.category is string && data.category.size() <= 100
+        && data.price is number && data.price >= 0
+        && (!('packageName' in data) || (data.packageName is string && data.packageName.size() <= 120))
+        && data.sellerId is string && data.sellerId.size() <= 128
+        && data.sellerName is string && data.sellerName.size() <= 120
+        && data.sellerPhone is string && data.sellerPhone.size() <= 32
+        && data.buyerName is string && data.buyerName.size() <= 120
+        && data.buyerPhone is string && data.buyerPhone.size() <= 32
+        && data.buyerAddress is string && data.buyerAddress.size() <= 300
+        && data.preferredTime is string && data.preferredTime.size() <= 100
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 500))
+        && (data.status in ['pending', 'confirmed', 'on_the_way', 'completed'])
+        && data.createdAt is string && data.createdAt.size() <= 64;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll([
+          'id', 'createdAt', 'buyerName', 'buyerPhone', 'deliveryAddress',
+          'deliveryArea', 'items', 'subtotal', 'totalAmount', 'paymentMode', 'status'
+        ])
+        && data.keys().hasOnly([
+          'id', 'createdAt', 'buyerName', 'buyerPhone', 'deliveryAddress',
+          'deliveryArea', 'items', 'subtotal', 'totalAmount', 'paymentMode',
+          'status', 'estimatedDelivery'
+        ])
+        && isValidId(data.id)
+        && data.createdAt is string && data.createdAt.size() <= 64
+        && data.buyerName is string && data.buyerName.size() <= 120
+        && data.buyerPhone is string && data.buyerPhone.size() <= 32
+        && data.deliveryAddress is string && data.deliveryAddress.size() <= 300
+        && data.deliveryArea is string && data.deliveryArea.size() <= 120
+        && data.items is list && data.items.size() <= 50
+        && data.subtotal is number && data.subtotal >= 0
+        && data.totalAmount is number && data.totalAmount >= 0
+        && data.paymentMode is string && data.paymentMode.size() <= 80
+        && (data.status in ['pending', 'confirmed', 'out_for_delivery', 'delivered'])
+        && (!('estimatedDelivery' in data) || (data.estimatedDelivery is string && data.estimatedDelivery.size() <= 120));
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['id', 'productId', 'buyerName', 'rating', 'createdAt'])
+        && data.keys().hasOnly(['id', 'productId', 'sellerId', 'buyerName', 'rating', 'comment', 'createdAt'])
+        && isValidId(data.id)
+        && data.productId is string && data.productId.size() <= 128
+        && (!('sellerId' in data) || (data.sellerId is string && data.sellerId.size() <= 128))
+        && data.buyerName is string && data.buyerName.size() <= 120
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && (!('comment' in data) || (data.comment is string && data.comment.size() <= 1000))
+        && data.createdAt is string && data.createdAt.size() <= 64;
+    }
+
+    function isValidReport(data) {
+      return data.keys().hasAll([
+          'id', 'productId', 'productTitle', 'sellerId', 'sellerName',
+          'reporterName', 'reporterPhone', 'reason', 'createdAt', 'status'
+        ])
+        && data.keys().hasOnly([
+          'id', 'productId', 'productTitle', 'sellerId', 'sellerName',
+          'reporterName', 'reporterPhone', 'reason', 'details', 'createdAt', 'status'
+        ])
+        && isValidId(data.id)
+        && data.productId is string && data.productId.size() <= 128
+        && data.productTitle is string && data.productTitle.size() <= 160
+        && data.sellerId is string && data.sellerId.size() <= 128
+        && data.sellerName is string && data.sellerName.size() <= 120
+        && data.reporterName is string && data.reporterName.size() <= 120
+        && data.reporterPhone is string && data.reporterPhone.size() <= 32
+        && data.reason is string && data.reason.size() <= 200
+        && (!('details' in data) || (data.details is string && data.details.size() <= 1000))
+        && data.createdAt is string && data.createdAt.size() <= 64
+        && (data.status in ['pending', 'resolved']);
+    }
+
+    function isValidPresence(data) {
+      return data.keys().hasAll(['key', 'lastSeenMs'])
+        && data.keys().hasOnly(['key', 'lastSeenMs'])
+        && data.key is string && data.key.size() >= 1 && data.key.size() <= 128
+        && data.lastSeenMs is number && data.lastSeenMs > 0;
+    }
+
+    function isValidVoiceCall(data) {
+      return data.keys().hasAll([
+          'id', 'callerRole', 'callerName', 'callerPhone', 'calleeRole',
+          'calleeId', 'calleeName', 'calleePhone', 'status', 'startedAtMs'
+        ])
+        && data.keys().hasOnly([
+          'id', 'callerRole', 'callerName', 'callerPhone', 'calleeRole',
+          'calleeId', 'calleeName', 'calleePhone', 'calleePhoto',
+          'productTitle', 'status', 'isCalleeOffline', 'startedAtMs', 'connectedAtMs'
+        ])
+        && isValidId(data.id)
+        && (data.callerRole == 'buyer' || data.callerRole == 'seller')
+        && data.callerName is string && data.callerName.size() <= 120
+        && data.callerPhone is string && data.callerPhone.size() <= 32
+        && (data.calleeRole == 'buyer' || data.calleeRole == 'seller')
+        && data.calleeId is string && data.calleeId.size() <= 128
+        && data.calleeName is string && data.calleeName.size() <= 120
+        && data.calleePhone is string && data.calleePhone.size() <= 32
+        && (data.status in ['ringing', 'connected', 'ended', 'missed', 'rejected'])
+        && data.startedAtMs is number
+        && (!('calleePhoto' in data) || (data.calleePhoto is string && data.calleePhoto.size() <= 450000))
+        && (!('productTitle' in data) || (data.productTitle is string && data.productTitle.size() <= 160))
+        && (!('isCalleeOffline' in data) || data.isCalleeOffline is bool)
+        && (!('connectedAtMs' in data) || data.connectedAtMs is number);
+    }
+
+    function isValidAdminPublic(data) {
+      return data.keys().hasAll(['secretPath', 'blueTickOfferStartIso', 'adminJazzCashNumber', 'adminJazzCashTitle'])
+        && data.keys().hasOnly(['secretPath', 'blueTickOfferStartIso', 'adminJazzCashNumber', 'adminJazzCashTitle', 'updatedAtIso'])
+        && data.secretPath is string && data.secretPath.matches('^/[a-zA-Z0-9_\\-]{4,60}$')
+        && data.blueTickOfferStartIso is string && data.blueTickOfferStartIso.size() <= 64
+        && data.adminJazzCashNumber is string && data.adminJazzCashNumber.size() <= 32
+        && data.adminJazzCashTitle is string && data.adminJazzCashTitle.size() <= 80
+        && (!('updatedAtIso' in data) || (data.updatedAtIso is string && data.updatedAtIso.size() <= 64));
+    }
+
+    function isValidAdminCredentials(data) {
+      return data.keys().hasAll(['adminPhone', 'pinHash', 'updatedAtIso'])
+        && data.keys().hasOnly(['adminPhone', 'pinHash', 'authProofHash', 'updatedAtIso'])
+        && data.adminPhone is string && data.adminPhone.size() >= 7 && data.adminPhone.size() <= 32
+        && data.pinHash is string && data.pinHash.matches('^[a-f0-9]{64}$')
+        && (!('authProofHash' in data) || (data.authProofHash is string && data.authProofHash.matches('^[a-f0-9]{64}$')))
+        && data.updatedAtIso is string && data.updatedAtIso.size() <= 64;
+    }
+
+    match /test/{docId} {
+      allow get: if docId == 'connection';
+      allow list, write: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isValidId(userId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(userId) && isValidUser(incoming()) && incoming().id == userId;
+      allow update: if isValidId(userId) && isValidUser(incoming()) && incoming().id == existing().id;
+      allow delete: if false;
+    }
+
+    match /sellers/{sellerId} {
+      allow get: if isValidId(sellerId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(sellerId) && isValidSeller(incoming()) && incoming().id == sellerId;
+      allow update: if isValidId(sellerId) && isValidSeller(incoming()) && incoming().id == existing().id;
+      allow delete: if false;
+    }
+
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(productId) && isValidProduct(incoming()) && incoming().id == productId;
+      allow update: if isValidId(productId)
+        && isValidProduct(incoming())
+        && incoming().id == existing().id
+        && incoming().sellerId == existing().sellerId;
+      allow delete: if isValidId(productId);
+    }
+
+    match /chats/{threadId} {
+      allow get: if isValidId(threadId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(threadId) && isValidChatThread(incoming()) && incoming().id == threadId;
+      allow update: if isValidId(threadId) && isValidChatThread(incoming()) && incoming().id == existing().id;
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow get: if isValidId(threadId) && isValidId(messageId);
+        allow list: if isValidId(threadId) && request.time is timestamp;
+        allow create: if isValidId(threadId)
+          && isValidId(messageId)
+          && isValidChatMessage(incoming())
+          && incoming().id == messageId
+          && exists(/databases/$(database)/documents/chats/$(threadId));
+        allow update: if isValidId(threadId)
+          && isValidId(messageId)
+          && isValidChatMessage(incoming())
+          && incoming().id == existing().id
+          && incoming().diff(existing()).affectedKeys().hasOnly(['delivered', 'seen']);
+        allow delete: if false;
+      }
+    }
+
+    match /blue_tick_requests/{requestId} {
+      allow get: if isValidId(requestId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(requestId) && isValidBlueTickRequest(incoming()) && incoming().id == requestId;
+      allow update: if isValidId(requestId) && isValidBlueTickRequest(incoming()) && incoming().id == existing().id;
+      allow delete: if false;
+    }
+
+    match /id_proofs/{sellerId} {
+      allow get: if isValidId(sellerId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(sellerId) && isValidIdProof(incoming()) && incoming().sellerId == sellerId;
+      allow update: if isValidId(sellerId) && isValidIdProof(incoming()) && incoming().sellerId == existing().sellerId;
+      allow delete: if isValidId(sellerId);
+    }
+
+    match /home_bookings/{bookingId} {
+      allow get: if isValidId(bookingId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(bookingId) && isValidBooking(incoming()) && incoming().id == bookingId;
+      allow update: if isValidId(bookingId) && isValidBooking(incoming()) && incoming().id == existing().id;
+      allow delete: if false;
+    }
+
+    match /orders/{orderId} {
+      allow get: if isValidId(orderId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(orderId) && isValidOrder(incoming()) && incoming().id == orderId;
+      allow update: if isValidId(orderId) && isValidOrder(incoming()) && incoming().id == existing().id;
+      allow delete: if false;
+    }
+
+    match /reviews/{reviewId} {
+      allow get: if isValidId(reviewId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(reviewId) && isValidReview(incoming()) && incoming().id == reviewId;
+      allow update, delete: if false;
+    }
+
+    match /reports/{reportId} {
+      allow get: if isValidId(reportId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(reportId) && isValidReport(incoming()) && incoming().id == reportId;
+      allow update: if isValidId(reportId) && isValidReport(incoming()) && incoming().id == existing().id;
+      allow delete: if false;
+    }
+
+    match /presence/{presenceId} {
+      allow get: if isValidId(presenceId);
+      allow list: if request.time is timestamp;
+      allow create, update: if isValidId(presenceId) && isValidPresence(incoming());
+      allow delete: if false;
+    }
+
+    match /voice_calls/{callId} {
+      allow get: if isValidId(callId);
+      allow list: if request.time is timestamp;
+      allow create: if isValidId(callId) && isValidVoiceCall(incoming()) && incoming().id == callId;
+      allow update: if isValidId(callId) && isValidVoiceCall(incoming()) && incoming().id == existing().id;
+      allow delete: if isValidId(callId);
+    }
+
+    match /admin_config/{configId} {
+      allow list: if false;
+      allow get: if configId == 'public' || configId == 'credentials';
+      allow create: if (configId == 'public' && isValidAdminPublic(incoming()))
+        || (configId == 'credentials' && isValidAdminCredentials(incoming()));
+      allow update: if (configId == 'public' && isValidAdminPublic(incoming()))
+        || (configId == 'credentials'
+          && isValidAdminCredentials(incoming())
+          && incoming().keys().hasAll(['authProofHash'])
+          && incoming().authProofHash == existing().pinHash);
+      allow delete: if false;
+    }
+  }
+}

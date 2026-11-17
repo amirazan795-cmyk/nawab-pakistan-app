@@ -1,0 +1,6 @@
+{
+  "name": "Dollar Bazaar - Rawalpindi",
+  "description": "Local buy and sell marketplace for Rawalpindi, Pakistan with JazzCash/EasyPaisa escrow, Friday seller payouts, and local rider delivery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

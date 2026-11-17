@@ -1,0 +1,145 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+* {
+  -webkit-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+}
+
+html {
+  -webkit-text-size-adjust: 100% !important;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
+  touch-action: manipulation;
+}
+
+body {
+  touch-action: manipulation;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input, textarea, select {
+  font-size: 16px !important;
+  touch-action: manipulation;
+  scroll-margin-top: 88px;
+  scroll-margin-bottom: 120px;
+}
+
+input::placeholder, textarea::placeholder {
+  font-size: 16px !important;
+}
+
+input::-webkit-input-placeholder, textarea::-webkit-input-placeholder {
+  font-size: 16px !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  font-size: 16px !important;
+  zoom: 1 !important;
+  transform: none !important;
+}
+
+@keyframes nawabPagriShine {
+  0% {
+    transform: translateX(-160%) skewX(-24deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  32% {
+    transform: translateX(240%) skewX(-24deg);
+    opacity: 1;
+  }
+  36%,
+  100% {
+    transform: translateX(240%) skewX(-24deg);
+    opacity: 0;
+  }
+}
+
+.nawab-pagri-logo-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.nawab-pagri-shine {
+  position: absolute;
+  top: -15%;
+  left: 0;
+  width: 55%;
+  height: 130%;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(254, 249, 195, 0.3) 28%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(253, 224, 71, 0.45) 72%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: nawabPagriShine 3s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes nawabCategoryIconShine {
+  0% {
+    transform: translateX(-160%) skewX(-20deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.78;
+  }
+  36% {
+    opacity: 0.78;
+  }
+  46%,
+  100% {
+    transform: translateX(220%) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
+.nawab-cat-icon-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.nawab-cat-shine {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 65%;
+  height: 140%;
+  z-index: 10;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    rgba(251, 191, 36, 0) 0%,
+    rgba(251, 191, 36, 0.16) 28%,
+    rgba(253, 224, 71, 0.36) 50%,
+    rgba(254, 240, 138, 0.18) 70%,
+    rgba(251, 191, 36, 0) 100%
+  );
+  animation: nawabCategoryIconShine 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.nawab-cat-grid > button:nth-child(1) .nawab-cat-shine { animation-delay: 0s; }
+.nawab-cat-grid > button:nth-child(2) .nawab-cat-shine { animation-delay: 0.24s; }
+.nawab-cat-grid > button:nth-child(3) .nawab-cat-shine { animation-delay: 0.48s; }
+.nawab-cat-grid > button:nth-child(4) .nawab-cat-shine { animation-delay: 0.72s; }
+.nawab-cat-grid > button:nth-child(5) .nawab-cat-shine { animation-delay: 0.96s; }
+.nawab-cat-grid > button:nth-child(6) .nawab-cat-shine { animation-delay: 1.20s; }
+.nawab-cat-grid > button:nth-child(7) .nawab-cat-shine { animation-delay: 1.44s; }
+.nawab-cat-grid > button:nth-child(8) .nawab-cat-shine { animation-delay: 1.68s; }
+.nawab-cat-grid > button:nth-child(9) .nawab-cat-shine { animation-delay: 1.92s; }
+.nawab-cat-grid > button:nth-child(10) .nawab-cat-shine { animation-delay: 2.16s; }
+.nawab-cat-grid > button:nth-child(11) .nawab-cat-shine { animation-delay: 2.40s; }
+.nawab-cat-grid > button:nth-child(12) .nawab-cat-shine { animation-delay: 2.64s; }
